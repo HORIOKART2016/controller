@@ -19,7 +19,7 @@
 #define MAX_ACC 2.0		//加速度の設定  [km/h.s]
 
 
-#define COMPORT "\\\\.\\COM8"
+#define COMPORT "\\\\.\\COM11"
 
 bool isInitialized = false;
 
@@ -113,7 +113,7 @@ void read_states(int arduino_state, int *button_state){
 		remainder = inp % 2;	//余りを求める
 		button_state[i] = remainder;		//ボタンのステータスを取得
 		inp = (inp - remainder) / 2;		//次の結果にまわす割り算
-
+		printf("%d\n", remainder);
 	}
 	
 }
@@ -124,7 +124,7 @@ void read_states(int arduino_state, int *button_state){
 int main(int argc, _TCHAR* argv[])
 {
 	HANDLE hCom;		//ArduinoのCOMポートのハンドル
-	char arduino_state[1];
+	unsigned char arduino_state[1];
 	unsigned long len;
 	int ret;
 	int state;
@@ -143,25 +143,35 @@ int main(int argc, _TCHAR* argv[])
 	ang_vel = (vel / 3600) / TIRE_R;
 
 	//ループ内でArduinoと通信を行いボタンのステータスを取得しモータードライバーに指令を送る
-
+	
 	while (1){
 
 		//arduinoからステータスを取得
 		// ハンドルチェック
-		if (!hCom)	return -1;
+		if (!hCom)	{
+			printf("error!!\n");
+			return -1;
+		}
+
+
 		// 通信バッファクリア
 		PurgeComm(hCom, PURGE_RXCLEAR);
 		// Arduinoからデータを受信
 		ret = ReadFile(hCom, &arduino_state, 1, &len, NULL);
 
-		state = (int)arduino_state[0];
+		printf("len :%d\n",len);
 
+		//printf("%c%c\n", arduino_state[0], arduino_state[1]);
+		printf("%d\n", (int)arduino_state[0]);
+		state = (int)arduino_state[0];
+		//printf("state\n");
 
 		//非常停止ボタンが押されたときの動作
 		//プログラムによる非常停止であり，補助的役割
 		//一度押されたら5秒間他の動作を受け付けない，
 		//押された後フリーズ状態となり，もう一度押されるまで反応しない
 		if (button_state[5] == 1){
+			printf("emergency");
 			if (emergency_state){
 				//非常停止状態で押されたときは停止指令を送った上で復帰する
 				Spur_stop();
@@ -237,12 +247,8 @@ int main(int argc, _TCHAR* argv[])
 		}
 
 
-
-
-
-
-
-
+		
+		Sleep(500);
 	}
 
 
