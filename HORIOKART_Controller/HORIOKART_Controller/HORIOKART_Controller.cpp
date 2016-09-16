@@ -19,7 +19,7 @@
 #define MAX_ACC 2.0		//加速度の設定  [km/h.s]
 
 
-#define COMPORT "\\\\.\\COM8"
+#define COMPORT "\\\\.\\COM15"
 
 bool isInitialized = false;
 
@@ -155,7 +155,7 @@ int main(int argc, _TCHAR* argv[])
 		ret = ReadFile(hCom, &arduino_state, 1, &len, NULL);
 
 		state = (int)arduino_state[0];
-
+		printf("%d\n", (int)arduino_state[0]);
 
 		//非常停止ボタンが押されたときの動作
 		//プログラムによる非常停止であり，補助的役割
