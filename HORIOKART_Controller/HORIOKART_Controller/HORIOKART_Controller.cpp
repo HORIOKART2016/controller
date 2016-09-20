@@ -15,15 +15,15 @@
 
 #define TIRE_R 0.2900   //タイヤ径[m]
 
-#define MAX_VEL 3.9		//最高速度設定　[km/h]
-#define MAX_ACC 2.0		//加速度の設定  [km/h.s]
+#define MAX_VEL 3500		//最高速度設定　[m/h]
+#define MAX_ACC 2000		//加速度の設定  [m/h.s]
 
 
-#define COMPORT "\\\\.\\COM11"
+#define COMPORT "\\\\.\\COM15"
 
 bool isInitialized = false;
 
-double vel = 3.0;			//速度の指定[km/h]
+double vel = 2.5;			//速度の指定[km/h]
 
 
 
@@ -113,8 +113,9 @@ void read_states(int arduino_state, int *button_state){
 		remainder = inp % 2;	//余りを求める
 		button_state[i] = remainder;		//ボタンのステータスを取得
 		inp = (inp - remainder) / 2;		//次の結果にまわす割り算
-		printf("%d\n", remainder);
+
 	}
+	printf("%d,%d,%d,%d,%d,%d\n", button_state[0], button_state[1], button_state[2], button_state[3], button_state[4], button_state[5]);
 	
 }
 
@@ -124,7 +125,7 @@ void read_states(int arduino_state, int *button_state){
 int main(int argc, _TCHAR* argv[])
 {
 	HANDLE hCom;		//ArduinoのCOMポートのハンドル
-	unsigned char arduino_state[1];
+	char arduino_state[1];
 	unsigned long len;
 	int ret;
 	int state;
@@ -134,44 +135,48 @@ int main(int argc, _TCHAR* argv[])
 	int emergency_state = 0;
 	double ang_vel;
 
-	initSpur();			//ypspurの初期化
+	int before_state=10;
+
+
+	if(initSpur())
+		return -1;			//ypspurの初期化
 
 	getArduinoHandle(hCom);		//Arduinoのハンドルを取得する
 
-	YP_set_wheel_vel((MAX_VEL / 3600) / TIRE_R, (MAX_VEL / 3600) / TIRE_R);
+	
+	
+	YP_set_wheel_vel((1000 * MAX_VEL / 3600) / (TIRE_R / 2), (1000 *MAX_VEL / 3600) / (TIRE_R / 2));
 
-	ang_vel = (vel / 3600) / TIRE_R;
+	YP_set_wheel_accel(1.5, 1.5);
+
+
+
+
+	ang_vel = (800 * vel / 3600) / (TIRE_R / 2);
+
 
 	//ループ内でArduinoと通信を行いボタンのステータスを取得しモータードライバーに指令を送る
-	
+
 	while (1){
 
 		//arduinoからステータスを取得
 		// ハンドルチェック
-		if (!hCom)	{
-			printf("error!!\n");
-			return -1;
-		}
-
-
+		if (!hCom)	return -1;
 		// 通信バッファクリア
 		PurgeComm(hCom, PURGE_RXCLEAR);
 		// Arduinoからデータを受信
 		ret = ReadFile(hCom, &arduino_state, 1, &len, NULL);
 
-		printf("len :%d\n",len);
-
-		//printf("%c%c\n", arduino_state[0], arduino_state[1]);
-		printf("%d\n", (int)arduino_state[0]);
 		state = (int)arduino_state[0];
-		//printf("state\n");
+		printf("%d\n", (int)arduino_state[0]);
+
+		read_states(state, button_state);
 
 		//非常停止ボタンが押されたときの動作
 		//プログラムによる非常停止であり，補助的役割
 		//一度押されたら5秒間他の動作を受け付けない，
 		//押された後フリーズ状態となり，もう一度押されるまで反応しない
 		if (button_state[5] == 1){
-			printf("emergency");
 			if (emergency_state){
 				//非常停止状態で押されたときは停止指令を送った上で復帰する
 				Spur_stop();
@@ -190,7 +195,9 @@ int main(int argc, _TCHAR* argv[])
 
 		//車輪ロックの解除ボタンの動作
 		if (button_state[4] == 1){
+			printf("free");
 			Spur_free();
+			before_state = 0;
 		}
 
 
@@ -200,55 +207,94 @@ int main(int argc, _TCHAR* argv[])
 
 		//front/left
 		//左方向に内側と外側の車輪の速度を1：2に
-		if ((button_state[0] == 1) && (button_state[2] == 1)){
-			YP_wheel_vel(-(MAX_VEL / 3600) / (2*TIRE_R), (MAX_VEL / 3600) / TIRE_R);
-
+		else if ((button_state[0] == 1) && (button_state[2] == 1)){
+			if (before_state!=1)
+				YP_wheel_vel(-ang_vel/2, ang_vel);
+			
+			before_state = 1;
+			
 		}
 		//front/right
 		else if((button_state[0] == 1) && (button_state[3] == 1)){
-			YP_wheel_vel(-(MAX_VEL / 3600) / (TIRE_R), (MAX_VEL / 3600) / (2*TIRE_R));
+			if(before_state!=2)
+				YP_wheel_vel(-ang_vel, ang_vel/2);
+
+			before_state = 2;
 		}
 
 		//back/left
 		else if ((button_state[1] == 1) && (button_state[2] == 1)){
-			YP_wheel_vel((MAX_VEL / 3600) / (2 * TIRE_R), -(MAX_VEL / 3600) / TIRE_R);
+			if(before_state!=3)
+				YP_wheel_vel(ang_vel/2, -ang_vel);
+
+			before_state = 3;
 		}
 
 
 		//back/right
 		else if ((button_state[1] == 1) && (button_state[3] == 1)){
-			YP_wheel_vel(-(MAX_VEL / 3600) / (TIRE_R), (MAX_VEL / 3600) / (2 * TIRE_R));
+			if(before_state!=4)
+				YP_wheel_vel(-ang_vel, ang_vel/2);
+
+			before_state = 4;
 		}
 
 		//front
 		else if (button_state[0] == 1){
 
-			YP_wheel_vel(-(MAX_VEL / 3600) / TIRE_R, (MAX_VEL / 3600) / TIRE_R);
+			if (before_state != 5){
+				//YP_wheel_vel(-(MAX_VEL / 3600) / TIRE_R, (MAX_VEL / 3600) / TIRE_R);
+				YP_wheel_vel(-ang_vel, ang_vel);
+				printf("前進");
+			}
+
+			before_state = 5;
 
 		}
 
 		//back
 		else if (button_state[1] == 1){
-			YP_wheel_vel((MAX_VEL / 3600) / TIRE_R, -(MAX_VEL / 3600) / TIRE_R);
+			if(before_state!=7)
+				YP_wheel_vel(ang_vel, -ang_vel);
+
+			before_state = 7;
 		}
 
 		//left
 		//左に曲がるように両輪を逆回転
 		else if (button_state[2] == 1){
-			YP_wheel_vel((MAX_VEL / 3600) / (2*TIRE_R), -(MAX_VEL / 3600) / (2*TIRE_R));
+			if (before_state != 8)
+				YP_wheel_vel(-ang_vel, -ang_vel);
+
+			before_state = 8;
 		}
 		//right
 		else if (button_state[3] == 1){
-			YP_wheel_vel(+(MAX_VEL / 3600) / (2 * TIRE_R), (MAX_VEL / 3600) / (2 * TIRE_R));
+			if (before_state!=9)
+				YP_wheel_vel(ang_vel,ang_vel);
+
+			before_state = 9;
 		}
 
 		else{
-			Spur_stop();
+			if (before_state != 0){
+				printf("real stop");
+				Spur_stop();
+				before_state = 10;
+			}
+				
+			printf("Stop");
+			
 		}
 
+		printf("\n%d\n", before_state);
 
-		
-		Sleep(500);
+
+
+
+
+
+
 	}
 
 
