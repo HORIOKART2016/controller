@@ -147,12 +147,12 @@ int main(int argc, _TCHAR* argv[])
 	
 	YP_set_wheel_vel((1000 * MAX_VEL / 3600) / (TIRE_R / 2), (1000 *MAX_VEL / 3600) / (TIRE_R / 2));
 
-	YP_set_wheel_accel(3.14, 3.14);
+	YP_set_wheel_accel(1.5, 1.5);
 
 
 
 
-	ang_vel = (1000 * vel / 3600) / (TIRE_R / 2);
+	ang_vel = (800 * vel / 3600) / (TIRE_R / 2);
 
 
 	//ループ内でArduinoと通信を行いボタンのステータスを取得しモータードライバーに指令を送る
