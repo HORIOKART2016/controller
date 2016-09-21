@@ -137,6 +137,7 @@ int main(int argc, _TCHAR* argv[])
 
 	int before_state=10;
 
+	double vr, vl;
 
 	if(initSpur())
 		return -1;			//ypspurの初期化
@@ -208,24 +209,30 @@ int main(int argc, _TCHAR* argv[])
 		//front/left
 		//左方向に内側と外側の車輪の速度を1：2に
 		else if ((button_state[0] == 1) && (button_state[2] == 1)){
-			if (before_state!=1)
-				YP_wheel_vel(-ang_vel/2, ang_vel);
+			if (before_state != 1){
+				YP_wheel_vel(-ang_vel / 2, ang_vel);
+				printf("status update\nfront/right\n");
+			}
 			
 			before_state = 1;
 			
 		}
 		//front/right
 		else if((button_state[0] == 1) && (button_state[3] == 1)){
-			if(before_state!=2)
-				YP_wheel_vel(-ang_vel, ang_vel/2);
+			if (before_state != 2){
+				YP_wheel_vel(-ang_vel, ang_vel / 2);
+				printf("status update\nfront/right\n");
+			}
 
 			before_state = 2;
 		}
 
 		//back/left
 		else if ((button_state[1] == 1) && (button_state[2] == 1)){
-			if(before_state!=3)
-				YP_wheel_vel(ang_vel/2, -ang_vel);
+			if (before_state != 3){
+				YP_wheel_vel(ang_vel / 2, -ang_vel);
+				printf("status update\nback/left\n");
+			}
 
 			before_state = 3;
 		}
@@ -233,9 +240,10 @@ int main(int argc, _TCHAR* argv[])
 
 		//back/right
 		else if ((button_state[1] == 1) && (button_state[3] == 1)){
-			if(before_state!=4)
-				YP_wheel_vel(-ang_vel, ang_vel/2);
-
+			if (before_state != 4){
+				YP_wheel_vel(-ang_vel, ang_vel / 2);
+				printf("status update\nback/right\n");
+			}
 			before_state = 4;
 		}
 
@@ -245,7 +253,7 @@ int main(int argc, _TCHAR* argv[])
 			if (before_state != 5){
 				//YP_wheel_vel(-(MAX_VEL / 3600) / TIRE_R, (MAX_VEL / 3600) / TIRE_R);
 				YP_wheel_vel(-ang_vel, ang_vel);
-				printf("前進");
+				printf("status update\nfront\n");
 			}
 
 			before_state = 5;
@@ -254,41 +262,47 @@ int main(int argc, _TCHAR* argv[])
 
 		//back
 		else if (button_state[1] == 1){
-			if(before_state!=7)
+			if (before_state != 7){
 				YP_wheel_vel(ang_vel, -ang_vel);
-
+				printf("status update\nback\n");
+			}
 			before_state = 7;
 		}
 
 		//left
 		//左に曲がるように両輪を逆回転
 		else if (button_state[2] == 1){
-			if (before_state != 8)
+			if (before_state != 8){
 				YP_wheel_vel(-ang_vel, -ang_vel);
-
+				printf("status update\nleft\n");
+			}
 			before_state = 8;
 		}
 		//right
 		else if (button_state[3] == 1){
-			if (before_state!=9)
-				YP_wheel_vel(ang_vel,ang_vel);
+			if (before_state != 9){
+				YP_wheel_vel(ang_vel, ang_vel);
+				printf("status update\nright\n");
+			}
 
 			before_state = 9;
 		}
 
 		else{
 			if (before_state != 0){
-				printf("real stop");
+				printf("stop");
 				Spur_stop();
 				before_state = 10;
 			}
 				
-			printf("Stop");
+			//printf("Stop");
 			
 		}
 
 		printf("\n%d\n", before_state);
+		YP_get_wheel_vel(&vr, &vl);
 
+		printf("現在角速度:%lf,%lf\n", vr, vl);
 
 
 
