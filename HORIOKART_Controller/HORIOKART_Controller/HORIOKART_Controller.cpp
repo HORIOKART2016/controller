@@ -23,7 +23,7 @@
 
 bool isInitialized = false;
 
-double vel = 2.5;			//‘¬“x‚ÌŽw’è[km/h]
+double vel = 2.0;			//‘¬“x‚ÌŽw’è[km/h]
 
 
 
@@ -138,6 +138,9 @@ int main(int argc, _TCHAR* argv[])
 	int before_state=10;
 
 	double vr, vl;
+
+	int standby_count=0;
+
 
 	if(initSpur())
 		return -1;			//ypspur‚Ì‰Šú‰»
@@ -273,7 +276,7 @@ int main(int argc, _TCHAR* argv[])
 		//¶‚É‹È‚ª‚é‚æ‚¤‚É—¼—Ö‚ð‹t‰ñ“]
 		else if (button_state[2] == 1){
 			if (before_state != 8){
-				YP_wheel_vel(-ang_vel, -ang_vel);
+				YP_wheel_vel(ang_vel, ang_vel);
 				printf("status update\nleft\n");
 			}
 			before_state = 8;
@@ -281,7 +284,7 @@ int main(int argc, _TCHAR* argv[])
 		//right
 		else if (button_state[3] == 1){
 			if (before_state != 9){
-				YP_wheel_vel(ang_vel, ang_vel);
+				YP_wheel_vel(-ang_vel, -ang_vel);
 				printf("status update\nright\n");
 			}
 
@@ -291,7 +294,10 @@ int main(int argc, _TCHAR* argv[])
 		else{
 			if (before_state != 0){
 				printf("stop");
-				Spur_stop();
+				YP_set_wheel_accel(6.28, 6.28);
+				YP_wheel_vel(0.0, 0.0);
+				YP_set_wheel_accel(1.5, 1.5);
+				//Spur_stop();
 				before_state = 10;
 			}
 				
@@ -302,8 +308,20 @@ int main(int argc, _TCHAR* argv[])
 		printf("\n%d\n", before_state);
 		YP_get_wheel_vel(&vr, &vl);
 
-		printf("Œ»ÝŠp‘¬“x:%lf,%lf\n", vr, vl);
+		printf("Œ»ÝŠp‘¬“x:%lf,%lf  ·:%lf\n", vr, vl,vr+vl);
 
+		Sleep(50);
+		standby_count++;
+
+		if (standby_count > 100){
+			if (before_state == 10){
+				Spur_stop();
+			}
+			else if (before_state == 0){
+				Spur_free();
+			}
+			standby_count = 0;
+		}
 
 
 
