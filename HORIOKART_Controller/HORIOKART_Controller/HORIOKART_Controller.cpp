@@ -115,7 +115,7 @@ void read_states(int arduino_state, int *button_state){
 		inp = (inp - remainder) / 2;		//Ÿ‚ÌŒ‹‰Ê‚É‚Ü‚í‚·Š„‚èZ
 
 	}
-	printf("%d,%d,%d,%d,%d,%d\n", button_state[0], button_state[1], button_state[2], button_state[3], button_state[4], button_state[5]);
+	//printf("%d,%d,%d,%d,%d,%d\n", button_state[0], button_state[1], button_state[2], button_state[3], button_state[4], button_state[5]);
 	
 }
 
@@ -172,7 +172,7 @@ int main(int argc, _TCHAR* argv[])
 		ret = ReadFile(hCom, &arduino_state, 1, &len, NULL);
 
 		state = (int)arduino_state[0];
-		printf("%d\n", (int)arduino_state[0]);
+		//printf("%d\n", (int)arduino_state[0]);
 
 		read_states(state, button_state);
 
@@ -190,7 +190,7 @@ int main(int argc, _TCHAR* argv[])
 				//‰ğœŒã‚Íƒ{ƒ^ƒ“Œë‘€ì–h~‚Ì‚½‚ß1•bŠÔ’â~‚·‚é
 			}
 
-			Spur_freeze();
+			Spur_stop();
 			emergency_state = 1;
 			Sleep(5000);
 
@@ -199,7 +199,7 @@ int main(int argc, _TCHAR* argv[])
 
 		//Ô—ÖƒƒbƒN‚Ì‰ğœƒ{ƒ^ƒ“‚Ì“®ì
 		if (button_state[4] == 1){
-			printf("free");
+			//printf("free");
 			Spur_free();
 			before_state = 0;
 		}
@@ -214,7 +214,7 @@ int main(int argc, _TCHAR* argv[])
 		else if ((button_state[0] == 1) && (button_state[2] == 1)){
 			if (before_state != 1){
 				YP_wheel_vel(-ang_vel / 2, ang_vel);
-				printf("status update\nfront/right\n");
+				//printf("status update\nfront/right\n");
 			}
 			
 			before_state = 1;
@@ -224,7 +224,7 @@ int main(int argc, _TCHAR* argv[])
 		else if((button_state[0] == 1) && (button_state[3] == 1)){
 			if (before_state != 2){
 				YP_wheel_vel(-ang_vel, ang_vel / 2);
-				printf("status update\nfront/right\n");
+				//printf("status update\nfront/right\n");
 			}
 
 			before_state = 2;
@@ -234,7 +234,7 @@ int main(int argc, _TCHAR* argv[])
 		else if ((button_state[1] == 1) && (button_state[2] == 1)){
 			if (before_state != 3){
 				YP_wheel_vel(ang_vel / 2, -ang_vel);
-				printf("status update\nback/left\n");
+				//printf("status update\nback/left\n");
 			}
 
 			before_state = 3;
@@ -245,7 +245,7 @@ int main(int argc, _TCHAR* argv[])
 		else if ((button_state[1] == 1) && (button_state[3] == 1)){
 			if (before_state != 4){
 				YP_wheel_vel(-ang_vel, ang_vel / 2);
-				printf("status update\nback/right\n");
+				//printf("status update\nback/right\n");
 			}
 			before_state = 4;
 		}
@@ -256,7 +256,7 @@ int main(int argc, _TCHAR* argv[])
 			if (before_state != 5){
 				//YP_wheel_vel(-(MAX_VEL / 3600) / TIRE_R, (MAX_VEL / 3600) / TIRE_R);
 				YP_wheel_vel(-ang_vel, ang_vel);
-				printf("status update\nfront\n");
+				//printf("status update\nfront\n");
 			}
 
 			before_state = 5;
@@ -267,7 +267,7 @@ int main(int argc, _TCHAR* argv[])
 		else if (button_state[1] == 1){
 			if (before_state != 7){
 				YP_wheel_vel(ang_vel, -ang_vel);
-				printf("status update\nback\n");
+				//printf("status update\nback\n");
 			}
 			before_state = 7;
 		}
@@ -277,7 +277,7 @@ int main(int argc, _TCHAR* argv[])
 		else if (button_state[2] == 1){
 			if (before_state != 8){
 				YP_wheel_vel(ang_vel, ang_vel);
-				printf("status update\nleft\n");
+				//printf("status update\nleft\n");
 			}
 			before_state = 8;
 		}
@@ -285,7 +285,7 @@ int main(int argc, _TCHAR* argv[])
 		else if (button_state[3] == 1){
 			if (before_state != 9){
 				YP_wheel_vel(-ang_vel, -ang_vel);
-				printf("status update\nright\n");
+				//printf("status update\nright\n");
 			}
 
 			before_state = 9;
@@ -293,7 +293,7 @@ int main(int argc, _TCHAR* argv[])
 
 		else{
 			if (before_state != 0){
-				printf("stop");
+				//printf("stop");
 				YP_set_wheel_accel(6.28, 6.28);
 				YP_wheel_vel(0.0, 0.0);
 				YP_set_wheel_accel(1.5, 1.5);
@@ -305,10 +305,10 @@ int main(int argc, _TCHAR* argv[])
 			
 		}
 
-		printf("\n%d\n", before_state);
+		//printf("\n%d\n", before_state);
 		YP_get_wheel_vel(&vr, &vl);
 
-		printf("Œ»İŠp‘¬“x:%lf,%lf  ·:%lf\n", vr, vl,vr+vl);
+		//printf("Œ»İŠp‘¬“x:%lf,%lf  ·:%lf\n", vr, vl,vr+vl);
 
 		Sleep(50);
 		standby_count++;
