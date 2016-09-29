@@ -306,19 +306,23 @@ int main(int argc, _TCHAR* argv[])
 		}
 
 		//printf("\n%d\n", before_state);
-		YP_get_wheel_vel(&vr, &vl);
+		
 
 		//printf("Œ»ÝŠp‘¬“x:%lf,%lf  ·:%lf\n", vr, vl,vr+vl);
 
 		Sleep(50);
 		standby_count++;
-
+		
+		YP_get_wheel_vel(&vr, &vl);
+		
 		if (standby_count > 100){
-			if (before_state == 10){
-				Spur_stop();
-			}
-			else if (before_state == 0){
-				Spur_free();
+			if (((vr + vl) / 2) == 0.0){
+				if (before_state == 10){
+					Spur_stop();
+				}
+				else if (before_state == 0){
+					Spur_free();
+				}
 			}
 			standby_count = 0;
 		}
