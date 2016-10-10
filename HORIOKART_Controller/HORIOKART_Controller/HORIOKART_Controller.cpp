@@ -176,11 +176,13 @@ int main(int argc, _TCHAR* argv[])
 		//”ñí’â~ƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚Æ‚«‚Ì“®ì
 		if (state == 99){
 			Spur_freeze();
+			printf("freeze!!\n");
 			while (state == 99){
 				Sleep(100);
 			}
 			Spur_stop();
 			Spur_unfreeze();
+			printf("unfreeze!!\n");
 		}
 
 		else{
@@ -274,7 +276,7 @@ int main(int argc, _TCHAR* argv[])
 			//¶‚É‹È‚ª‚é‚æ‚¤‚É—¼—Ö‚ğ‹t‰ñ“]
 			else if (button_state[2] == 1){
 				if (before_state != 8){
-					YP_wheel_vel(ang_vel, ang_vel);
+					YP_wheel_vel(-ang_vel, -ang_vel);
 					//printf("status update\nleft\n");
 				}
 				before_state = 8;
@@ -282,7 +284,7 @@ int main(int argc, _TCHAR* argv[])
 			//right
 			else if (button_state[3] == 1){
 				if (before_state != 9){
-					YP_wheel_vel(-ang_vel, -ang_vel);
+					YP_wheel_vel(ang_vel, ang_vel);
 					//printf("status update\nright\n");
 				}
 
