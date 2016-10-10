@@ -15,11 +15,11 @@
 
 #define TIRE_R 0.2900   //タイヤ径[m]
 
-#define MAX_VEL 3500		//最高速度設定　[m/h]
+#define MAX_VEL 2500		//最高速度設定　[m/h]
 #define MAX_ACC 2000		//加速度の設定  [m/h.s]
 
 
-#define COMPORT "\\\\.\\COM15"
+#define COMPORT "\\\\.\\COM17"
 
 bool isInitialized = false;
 
@@ -175,7 +175,12 @@ int main(int argc, _TCHAR* argv[])
 		//printf("%d\n", (int)arduino_state[0]);
 		//非常停止ボタンが押されたときの動作
 		if (state == 99){
+			Spur_freeze();
+			while (state == 99){
+				Sleep(100);
+			}
 			Spur_stop();
+			Spur_unfreeze();
 		}
 
 		else{
